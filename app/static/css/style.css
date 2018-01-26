@@ -1,0 +1,95 @@
+.site-header{
+ position: relative;
+ background-color: #27AE60;
+ color: #fff;
+ text-align: center;
+}
+
+.site-header .form-group{
+  position: relative;
+  margin-top: 40px;
+}
+
+.site-header .header-share{
+  background: #ececfb;
+}
+.bdsharebuttonbox{
+	display: inline-block;
+	margin: 20px auto;
+}
+
+.get-desc{
+  color:#aaa;
+}
+
+.up-list{
+  padding: 0px;
+  margin: 0px;
+}
+
+.get-link{
+  color:#aaa;
+  word-break:break-all;
+}
+
+.left-title{
+  color: #333;
+}
+
+.site-footer{
+  position: relative;	
+  background-color: #27AE60;
+  color: #fff;
+  border-top: 30px solid #27AE60;
+}
+
+.site-footer .footer-top,.footer-about,.footer-link,.footer-qqun{
+    margin-bottom: 30px;
+}
+
+.site-footer .record{
+  color:#fff;
+}
+
+.footer-top .link{
+  color:#fff;
+  border-bottom: dotted 1px #fff;
+}
+
+.footer-qqun .list-qqun{
+  margin-bottom: 4px;
+}
+
+.footer-link .list-link{
+  margin-bottom: 4px;
+
+}
+
+.site-footer .footer-bottom{
+  background: rgb(40,164,93);
+  height: 50px;
+  line-height: 50px;
+  margin-top: 10px;
+}
+#back-to-top{
+  position: fixed;
+  right: 10px;
+  bottom: 10px;
+  background: rgba(39,174,96,0.6);
+  color: #ffffff;
+  text-align: center;
+  border-radius: 2px;
+  z-index: 1;
+  display: none;
+}
+
+#back-to-top i {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+}
+
+.footer-copyright{
+ padding: 0px;
+ margin: 0px;
+}
