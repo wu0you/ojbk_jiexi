@@ -1,4 +1,4 @@
-# Tumblr解析网站搭建教程
+# OJBK视频解析网站搭建教程
 1. 首先安装Python。linux自带了python，windows请自行下载python。推荐Centos7/Python2.7
 2. 这时候，pip应该可以用了。如果不行，linux请按下面的命令安装pip：
     `wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py`
