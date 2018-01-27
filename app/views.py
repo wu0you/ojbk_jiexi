@@ -1,7 +1,7 @@
 #-*- coding=utf-8 -*-
 from app import app, db
 from app.models import *
-from flask import render_template, redirect, request, url_for, flash, session, jsonify, make_response
+from flask import render_template, redirect, request, url_for, flash, session, jsonify, make_response,current_app
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -15,13 +15,12 @@ import os
 from hashlib import md5
 import string
 import random
-from .capture import ImageChar
 import StringIO
 from app import db
 from app.models import Context
 import parser
 from config import *
-
+from captcha import *
 
 basedir = os.path.abspath('.')
 clawer = os.path.join(basedir, 'tumblr.py')
@@ -77,7 +76,9 @@ def api():
     hash_ = request.form.get('hash')
     captcha_code = request.form.get('captcha_code')
     if captcha_code is not None:
-        if captcha_code == session.get('captcha'):
+        print 'input code is :',captcha_code
+        print 'session code is :',session.get('CAPTCHA')
+        if captcha_code.upper() == session.get('CAPTCHA'):
             return jsonify({'captcha': 'pass'})
     if hash_ != session.get('hash'):
         return jsonify({'captcha': 'ok'})
@@ -170,11 +171,11 @@ def api():
 
 
 
-@app.route('/captcha', methods=['POST'])
+@app.route('/captcha', methods=['GET'])
 def captcha():
     ic = ImageChar(fontColor=(100, 211, 90))
     strs, code_img = ic.randChinese(4)
-    session['captcha'] = strs
+    session['CAPTCHA'] = strs
     buf = StringIO.StringIO()
     code_img.save(buf, 'JPEG', quality=80)
     buf_str = buf.getvalue()
@@ -182,99 +183,3 @@ def captcha():
     response.headers['Content-Type'] = 'image/jpeg'
     return response
 
-
-@app.route('/get', methods=['POST', 'GET'])
-def getTumblr():
-    if request.method == 'POST':
-        id = request.form.get('id')
-        if 'tumblr.com/post' in id:
-            try:
-                video = ''
-                cont = requests.get(id).content
-                pictures = IMAGEREGEX.findall(cont)
-                vid = VIDEOREGEX.findall(cont)
-                poster = POSTERREGEX.findall(cont)
-                isvideo = 0
-                if vid:
-                    video = vhead % vid[0]
-                    poster = poster[0]
-                    isvideo = 1
-                if len(vid) + len(pictures) <> 0:
-                    flash('解析成功')
-                    return render_template('show_single.html', video=video, pictures=pictures, poster=poster, isvideo=isvideo)
-                else:
-                    flash('解析失败')
-                    return redirect(url_for('index'))
-            except Exception, e:
-                print e
-                flash('解析失败')
-                return redirect(url_for('index'))
-        else:
-            if check(id):
-                is_exists = ID.query.filter_by(id=id).first()
-                if is_exists is None:
-                    now = datetime.now()
-                    inserttime = now.strftime('%Y%m%d %H:%M:%S')
-                    a = ID(id=id, updateTime=inserttime, parseTimes=1)
-                    db.session.add(a)
-                    db.session.commit()
-                else:
-                    now = datetime.now()
-                    is_exists.updateTime = now.strftime('%Y%m%d %H:%M:%S')
-                    is_exists.parseTimes += 1
-                    db.session.add(is_exists)
-                    db.session.commit()
-                subprocess.Popen('python {clawer} {id}'.format(
-                    clawer=clawer, id=id), shell=True)
-                return redirect(url_for('showid', id=id))
-            else:
-                flash('解析失败')
-                return redirect(url_for('index'))
-    return 'hello world'
-
-
-@app.route('/show/<id>')
-def showid(id):
-    videos = Context.query.filter_by(id=id, isvideo=1).limit(10).all()
-    pictures = Context.query.filter_by(id=id, isvideo=0).limit(10).all()
-    if len(videos) + len(pictures) == 0:
-        isparse = 0
-    else:
-        isparse = 1
-    return render_template('show.html', id=id, videos=videos, pictures=pictures, isparse=isparse)
-
-
-@app.route('/showmore')
-def showmore():
-    id = request.args.get('id')
-    type = request.args.get('type')
-    page = request.args.get('page', 1, type=int)
-    if type == 'video':
-        pagination = Context.query.filter_by(id=id, isvideo=1).paginate(
-            page, per_page=20, error_out=False)
-    else:
-        pagination = Context.query.filter_by(id=id, isvideo=0).paginate(
-            page, per_page=20, error_out=False)
-    items = pagination.items
-    return render_template('showmore.html', id=id, pagination=pagination, type=type, items=items)
-
-
-@app.route('/download')
-def download():
-    id = request.args.get('id')
-    type = request.args.get('type')
-    if type == 'video':
-        isvideo = 1
-    else:
-        isvideo = 0
-    query_result = Context.query.filter_by(id=id, isvideo=isvideo).all()
-    if len(query_result) <> 0:
-        content = ''
-        for line in query_result:
-            content += '%s\n' % line.urls
-        response = make_response(content)
-        response.headers["Content-Disposition"] = "attachment; filename=%s.txt" % (
-            id + "_" + type)
-        return response
-    else:
-        return redirect(url_for('index'))
