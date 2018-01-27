@@ -15,3 +15,4 @@ webencodings==0.5.1
 Werkzeug==0.12.1
 WTForms==2.1
 pymysql==0.7.11
+redis==2.10.5
