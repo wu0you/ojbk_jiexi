@@ -35,13 +35,6 @@ vhead = 'https://vt.tumblr.com/tumblr_%s.mp4'
 HOME = 'http://%s.tumblr.com/api/read?&num=50'
 
 
-@app.before_request
-def before_request():
-    global ip
-    try:
-        ip = request.headers['X-Forwarded-For'].split(',')[0]
-    except:
-        ip = request.remote_addr
 
 
 def check(uid):
@@ -76,8 +69,7 @@ def form_trans():
 def index():
     hash_ = getmd5()
     session['hash'] = hash_
-    global ip
-    return render_template('base.html', hash_=hash_, ip=ip)
+    return render_template('base.html', hash_=hash_)
 
 
 @app.route('/api', methods=['POST'])
