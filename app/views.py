@@ -1,7 +1,7 @@
 #-*- coding=utf-8 -*-
 from app import app, db
 from app.models import *
-from flask import render_template, redirect, request, url_for, flash, session, jsonify, make_response,current_app
+from flask import render_template, redirect, request, url_for, flash, session, jsonify, make_response, current_app
 import sys
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -33,6 +33,15 @@ IMAGEREGEX = re.compile(
     '<meta property="og:image" content="(.*?)" /><meta property="og:image:height"')
 vhead = 'https://vt.tumblr.com/tumblr_%s.mp4'
 HOME = 'http://%s.tumblr.com/api/read?&num=50'
+
+
+@app.before_request
+def before_request():
+    global ip
+    try:
+        ip = request.headers['X-Forwarded-For'].split(',')[0]
+    except:
+        ip = request.remote_addr
 
 
 def check(uid):
@@ -67,7 +76,8 @@ def form_trans():
 def index():
     hash_ = getmd5()
     session['hash'] = hash_
-    return render_template('base.html', hash_=hash_)
+    global ip
+    return render_template('base.html', hash_=hash_, ip=ip)
 
 
 @app.route('/api', methods=['POST'])
@@ -76,8 +86,8 @@ def api():
     hash_ = request.form.get('hash')
     captcha_code = request.form.get('captcha_code')
     if captcha_code is not None:
-        print 'input code is :',captcha_code
-        print 'session code is :',session.get('CAPTCHA')
+        print 'input code is :', captcha_code
+        print 'session code is :', session.get('CAPTCHA')
         if captcha_code.upper() == session.get('CAPTCHA'):
             return jsonify({'captcha': 'pass'})
     if hash_ != session.get('hash'):
@@ -156,19 +166,18 @@ def api():
         # 2mm
         else:
             try:
-                video,title,picture=parser.main(url)
+                video, title, picture = parser.main(url)
                 retdata['status'] = 'ok'
                 retdata['total'] = 1
                 retdata['pages'] = 1
                 retdata['video'] = [
                     {'url': video, 'desc': title, 'thumb': picture}]
                 return jsonify(retdata)
-            except Exception,e:
+            except Exception, e:
                 print e
                 retdata['status'] = 'fail'
                 retdata['message'] = '解析网站不存在'
                 return jsonify(retdata)
-
 
 
 @app.route('/captcha', methods=['GET'])
@@ -182,4 +191,3 @@ def captcha():
     response = current_app.make_response(buf_str)
     response.headers['Content-Type'] = 'image/jpeg'
     return response
-

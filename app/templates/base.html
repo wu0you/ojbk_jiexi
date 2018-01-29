@@ -27,6 +27,8 @@
     <link href="/static/css/style.css" rel="stylesheet">
     <link rel="shortcut icon" href="/static/logo.ico">
     <script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)})(window,document,'script','https://www.google-analytics.com/analytics.js','ga');ga('create', 'UA-98994757-2', 'auto');ga('send', 'pageview');</script>
+    <script type="text/javascript" src="https://tajs.qq.com/stats?sId=65094144" charset="UTF-8"></script>
+
 
     <body>
         <!--头部-->
@@ -256,7 +258,7 @@
                 window.location.href = "#" + $("#url_input").val();
                 var url = $("#url_input").val();
                 var host = $.url(url).attr('host');
-                ga('send', 'event', '183.62.134.100', 'prase', url);
+                ga('send', 'event', '{{ip}}', 'prase', url);
                 var hash = "{{hash_}}";
                 $("#url_submit_icon").attr("class", "fa fa-spinner fa-pulse fa-lg");
                 $("#url_submit_button").attr("disabled", "disabled");
@@ -282,7 +284,7 @@
                             if (result.status == 'ok' && result.total != 0) {
                                 var video_html = "<div class=\"panel panel-success\"><div class=\"panel-heading\"><h3 class=\"panel-title\">视频列表：</h3></div><ul class=\"list-group\">";
                                 $.each(result.video, function(i) {
-                                    video_html += "<li class=\"list-group-item\"><p class=\"input-group\"><input type=\"text\" name=\"search\" id=\"video" + i + "\" class=\"form-control get-text\" value=\"" + result.video[i].url + "\"><span class=\"input-group-btn\"><a href=\"javascript:void(0);\" class=\"btn btn-info btnCopy\" data-clipboard-action=\"copy\" data-clipboard-target=\"#video" + i + "\" onclick=\"ga('send', 'event', '183.62.134.100', 'copy', '" + url + "');\"><span class=\"glyphicon glyphicon-duplicate\"></span></a><a href=\"" + result.video[i].url + "\" class=\"btn btn-primary get-dowmload\" download=\"title-time.mp4\" role=\"button\" title=\"下载\" onclick=\"ga('send', 'event', '183.62.134.100', 'download', '" + url + "');\"><span class=\"glyphicon glyphicon-save\"></span></a><a href=\"" + result.video[i].url + "\" class=\"btn btn-success\" role=\"button\" title=\"播放\" onclick=\"ga('send', 'event', '183.62.134.100', 'play', '" + url + "');\" data-toggle=\"lightbox\" data-title=\"\" data-type=\"video\" data-width=\"1024\"><span class=\"glyphicon glyphicon-play\"></span></a><a class=\"btn btn-default btn-warning hidden-xs\" title=\"扫码看视频\" onclick=\"ga('send', 'event', 'video', 'qrcode', '" + url + "');$.fancybox.open('<div id=\\\'qrcode\\\'></div>');$('#qrcode').qrcode({text:'" + result.video[i].url + "'});\"><span class=\"fa fa-qrcode\"></span></a></span></p><p class=\"get-desc\">简介：" + result.video[i].desc + "</p></li>";
+                                    video_html += "<li class=\"list-group-item\"><p class=\"input-group\"><input type=\"text\" name=\"search\" id=\"video" + i + "\" class=\"form-control get-text\" value=\"" + result.video[i].url + "\"><span class=\"input-group-btn\"><a href=\"javascript:void(0);\" class=\"btn btn-info btnCopy\" data-clipboard-action=\"copy\" data-clipboard-target=\"#video" + i + "\" onclick=\"ga('send', 'event', '{{ip}}', 'copy', '" + url + "');\"><span class=\"glyphicon glyphicon-duplicate\"></span></a><a href=\"" + result.video[i].url + "\" class=\"btn btn-primary get-dowmload\" download=\"title-time.mp4\" role=\"button\" title=\"下载\" onclick=\"ga('send', 'event', '{{ip}}', 'download', '" + url + "');\"><span class=\"glyphicon glyphicon-save\"></span></a><a href=\"" + result.video[i].url + "\" class=\"btn btn-success\" role=\"button\" title=\"播放\" onclick=\"ga('send', 'event', '{{ip}}', 'play', '" + url + "');\" data-toggle=\"lightbox\" data-title=\"\" data-type=\"video\" data-width=\"1024\"><span class=\"glyphicon glyphicon-play\"></span></a><a class=\"btn btn-default btn-warning hidden-xs\" title=\"扫码看视频\" onclick=\"ga('send', 'event', 'video', 'qrcode', '" + url + "');$.fancybox.open('<div id=\\\'qrcode\\\'></div>');$('#qrcode').qrcode({text:'" + result.video[i].url + "'});\"><span class=\"fa fa-qrcode\"></span></a></span></p><p class=\"get-desc\">简介：" + result.video[i].desc + "</p></li>";
                                 });
                                 video_html += "</ul></div>";
                                 $("#video").html(video_html);
