@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 parser.py
-*.sqlite
+data.sqlite
 
 # C extensions
 *.so
