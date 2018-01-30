@@ -35,8 +35,6 @@ vhead = 'https://vt.tumblr.com/tumblr_%s.mp4'
 HOME = 'http://%s.tumblr.com/api/read?&num=50'
 
 
-
-
 def check(uid):
     url = HOME % uid
     try:
@@ -143,7 +141,11 @@ def api():
                         clawer=clawer, id=id), shell=True)
                     retdata['status'] = 'ok'
                     retdata['total'] = 50
-                    retdata['pages'] = 1
+                    retdata['pages'] = 2
+                    retdata['html'] = '<a href="/download?id={}&type=video" class="btn btn-primary" role="button" title="导出视频">导出视频 <span class="glyphicon glyphicon-film"></span></a>'.format(
+                        id)
+                    retdata['html'] += ' | <a href="/download?id={}&type=picture" class="btn btn-primary" role="button" title="导出图片">导出图片 <span class="glyphicon glyphicon-picture"></span></a>'.format(
+                        id)
                     videos = Context.query.filter_by(
                         id=id, isvideo=1).limit(50).all()
                     for video in videos:
@@ -170,6 +172,27 @@ def api():
                 retdata['status'] = 'fail'
                 retdata['message'] = '解析网站不存在'
                 return jsonify(retdata)
+
+
+@app.route('/download')
+def download():
+    id = request.args.get('id')
+    type = request.args.get('type')
+    if type == 'video':
+        isvideo = 1
+    else:
+        isvideo = 0
+    query_result = Context.query.filter_by(id=id, isvideo=isvideo).all()
+    if len(query_result) <> 0:
+        content = ''
+        for line in query_result:
+            content += '%s\n' % line.urls
+        response = make_response(content)
+        response.headers["Content-Disposition"] = "attachment; filename=%s.txt" % (
+            id + "_" + type)
+        return response
+    else:
+        return redirect(url_for('index'))
 
 
 @app.route('/captcha', methods=['GET'])
