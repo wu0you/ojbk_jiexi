@@ -23,7 +23,7 @@ from config import *
 from captcha import *
 
 basedir = os.path.abspath('.')
-clawer = os.path.join(basedir, 'tumblr.py')
+clawer = os.path.join(basedir, 'tumblr_v2.py')
 
 #VIDEOREGEX = re.compile('http://media.tumblr.com/(.*?)_frame1')
 VIDEOREGEX = re.compile(
@@ -83,6 +83,8 @@ def api():
     if hash_ != session.get('hash'):
         return jsonify({'captcha': 'ok'})
     if hash_ is None:
+        return jsonify({'captcha': 'ok'})
+    if request.headers['User-Agent'] is None or 'python' in request.headers['User-Agent'].lower():
         return jsonify({'captcha': 'ok'})
     else:
         retdata = {}
@@ -149,10 +151,10 @@ def api():
                     retdata['html'] += ' | <a href="/download?id={}&type=picture" class="btn btn-primary" role="button" title="导出图片">导出图片 <span class="glyphicon glyphicon-picture"></span></a>'.format(
                         id)
                     videos = Context.query.filter_by(
-                        id=id, isvideo=1).limit(50).all()
+                        id=id, isvideo=1).order_by(Context.posttime.desc()).limit(50).all()
                     for video in videos:
                         retdata.setdefault('video', []).append(
-                            {'url': video.urls, 'desc': '', 'thumb': video.poster})
+                            {'url': video.urls, 'desc': video.description, 'thumb': video.poster})
                     return jsonify(retdata)
             else:
                 # flash('解析失败')
