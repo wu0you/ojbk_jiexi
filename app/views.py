@@ -82,6 +82,8 @@ def api():
             return jsonify({'captcha': 'pass'})
     if hash_ != session.get('hash'):
         return jsonify({'captcha': 'ok'})
+    if hash_ is None:
+        return jsonify({'captcha': 'ok'})
     else:
         retdata = {}
         # tumblr单个视频解析
