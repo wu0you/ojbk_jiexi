@@ -64,21 +64,22 @@ def parse_post(post):
     global pic_links
     posttime = time.localtime(post['unix-timestamp'])
     desc = post['slug']
+    pid=post['id']
     if post.has_key('video-player'):
         videosource = post['video-player']
         poster = re.findall("poster='(.*?)'", videosource)[0]
         vid = re.findall(
             '''poster='.*?[\w\W]*?/tumblr_(.*?)_.*?''', videosource)[0]
         video = vhead.format(vid)
-        video_links.append((desc, posttime, poster, video))
+        video_links.append((pid,desc, posttime, poster, video))
     if post.has_key('photo-caption'):
         if len(post['photos']) == 0:
             picture = post['photo-url-1280']
-            pic_links.append((desc, posttime, picture))
+            pic_links.append((pid,desc, posttime, picture))
         else:
             for pic in post['photos']:
                 picture = pic['photo-url-1280']
-                pic_links.append((desc, posttime, picture))
+                pic_links.append((pid,desc, posttime, picture))
 
 
 def parse_page(url):
@@ -91,21 +92,20 @@ def parse_page(url):
 
 
 def write(name):
-    videos = [(i[0], i[1], i[2], i[3].replace('/480', ''))
-              for i in video_links]
+    videos = video_links
     pictures = pic_links
     for url in videos:
-        desc, posttime, poster, video = url
-        data = Context.query.filter_by(id=name, urls=video).first()
-        if not data:
-            data = Context(id=name, urls=video, isvideo=1,
+        pid,desc, posttime, poster, video = url
+        data = Context.query.filter_by(uid=name, pid=pid).first()
+        if data is None:
+            data = Context(uid=name,pid=pid, urls=video, isvideo=1,
                            poster=poster, posttime=posttime, description=desc)
             db.session.add(data)
     for url in pictures:
-        desc, posttime, picture = url
-        dat = Context.query.filter_by(id=name, urls=picture).first()
-        if not dat:
-            data = Context(id=name, urls=picture, isvideo=0,
+        pid,desc, posttime, picture = url
+        dat = Context.query.filter_by(uid=name, pid=pid).first()
+        if dat is None:
+            data = Context(uid=name,pid=pid, urls=picture, isvideo=0,
                            poster=picture, posttime=posttime, description=desc)
             db.session.add(data)
     db.session.commit()

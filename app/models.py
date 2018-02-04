@@ -22,15 +22,16 @@ class ID(db.Model):
 
 class Context(db.Model):
     __tablename__ = 'context_table'
-    id = db.Column(db.String(64), primary_key=True)
-    urls = db.Column(db.String(200), primary_key=True)
+    uid = db.Column(db.String(64), primary_key=True)
+    pid=db.Column(db.String(200),primary_key=True)
+    urls = db.Column(db.String(200))
     isvideo = db.Column(db.Integer, default=0)  # 0=no,1=yes
     poster = db.Column(db.String(200))
     posttime = db.Column(db.DateTime())
-    description = db.Column(db.String(200))
+    description = db.Column(db.String(500))
 
     def __init__(self, **kwargs):
         super(Context, self).__init__(**kwargs)
 
     def __repr__(self):
-        return self.id
+        return self.uid
