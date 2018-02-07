@@ -3,6 +3,7 @@
 2. 这时候，pip应该可以用了。如果不行，linux请按下面的命令安装pip：
     `wget https://bootstrap.pypa.io/get-pip.py && python get-pip.py`
 3. 安装依赖库：`pip install -r requirement.txt`
+4. 创建一个`logs`目录: `mkdir logs`
 4. 创建数据库：`python rebuildDB.py`
 5. 安装`redis`：建议先安装宝塔，然后直接用宝塔安装redis
 6. 网站目录下运行：`gunicorn -w4 -b 0.0.0.0:5000 run:app`
