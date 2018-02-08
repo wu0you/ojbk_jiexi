@@ -19,7 +19,7 @@ import StringIO
 from app import db
 from app.models import Context
 import parser
-from . import logger
+from . import logger,rd
 from config import *
 from captcha import *
 
@@ -71,16 +71,22 @@ def getmd5():
 
 
 def getipwhois(ip):
-    url='http://tool.chinaz.com/ipwhois?q={}'.format(ip)
-    try:
-        r=requests.get(url,headers=headers,timeout=8)
+    if rd.exists(ip) and rd.get(ip)!='home':
+        netname=rd.get(ip)
+        print '{} exists in redis,netname {}'.format(ip,netname)
+    else:
+        print '{} exists doesn\' exists in redis'.format(ip)
+        url='http://tool.chinaz.com/ipwhois?q={}'.format(ip)
         try:
-            netname=re.findall('netname:(.*?)<br/>',r.content)[0].replace(' ','')
-        except:
-            netname=re.findall('<p>Name : (.*?)</p>',r.content)[0].replace(' ','')
-    except Exception,e:
-        print e
-        netname='home'
+            r=requests.get(url,headers=headers,timeout=8)
+            try:
+                netname=re.findall('netname:(.*?)<br/>',r.content)[0].replace(' ','')
+            except:
+                netname=re.findall('<p>Name : (.*?)</p>',r.content)[0].replace(' ','')
+            rd.set(ip,netname)
+        except Exception,e:
+            print e
+            netname='home'
     return netname
 
 

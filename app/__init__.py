@@ -6,6 +6,7 @@ from flask_bootstrap import Bootstrap
 from flask_pagedown import PageDown
 import logging
 import datetime
+from redis import Redis
 
 # 日志记录
 logger = logging.getLogger("ojbk")
@@ -18,10 +19,10 @@ formatter = logging.Formatter(
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
+rd = Redis(host='localhost', port=6379, db=0)
 
 app = Flask(__name__)
 app.config.from_object('config')
-
 # Celery configuration
 #celery = Celery(__name__, broker=app.config['CELERY_BROKER_URL'])
 db = SQLAlchemy(app, use_native_unicode='utf8')
