@@ -19,9 +19,10 @@ import StringIO
 from app import db
 from app.models import Context
 import parser
-from . import logger,rd
+from . import logger, rd
 from config import *
 from captcha import *
+from decorator import *
 
 basedir = os.path.abspath('.')
 clawer = os.path.join(basedir, 'tumblr_v2.py')
@@ -35,8 +36,11 @@ IMAGEREGEX = re.compile(
     '<meta property="og:image" content="(.*?)" /><meta property="og:image:height"')
 vhead = 'https://vt.tumblr.com/tumblr_%s.mp4'
 HOME = 'http://%s.tumblr.com/api/read?&num=50'
-headers={'User-Agent':"Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"}
-ban= ['TencentCloud','Savvis','ALICLOUD','GOOGLE-CLOUD']
+headers = {
+    'User-Agent': "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/59.0.3071.115 Safari/537.36"}
+ban = ['TencentCloud', 'Savvis', 'ALICLOUD', 'GOOGLE-CLOUD', 'WANG-SUKEJI']
+bad_ua=['FeedDemon ','BOT/0.1 (BOT for JCE)','CrawlDaddy ','Java','Feedly','UniversalFeedParser','ApacheBench','Swiftbot','ZmEu','Indy Library','oBot','jaunty','YandexBot','AhrefsBot','MJ12bot','WinHttp','EasouSpider','HttpClient','Microsoft URL Control','YYSpider','jaunty','Python-urllib','lightDeckReports Bot','PHP','Python','Go']
+
 
 def check(uid):
     url = HOME % uid
@@ -69,24 +73,25 @@ def getmd5():
     return a.hexdigest()
 
 
-
 def getipwhois(ip):
-    if rd.exists(ip) and rd.get(ip)!='home':
-        netname=rd.get(ip)
-        print '{} exists in redis,netname {}'.format(ip,netname)
+    if rd.exists(ip) and rd.get(ip) != 'home':
+        netname = rd.get(ip)
+        print '{} exists in redis,netname {}'.format(ip, netname)
     else:
         print '{} exists doesn\' exists in redis'.format(ip)
-        url='http://tool.chinaz.com/ipwhois?q={}'.format(ip)
+        url = 'http://tool.chinaz.com/ipwhois?q={}'.format(ip)
         try:
-            r=requests.get(url,headers=headers,timeout=8)
+            r = requests.get(url, headers=headers, timeout=8)
             try:
-                netname=re.findall('netname:(.*?)<br/>',r.content)[0].replace(' ','')
+                netname = re.findall('netname:(.*?)<br/>',
+                                     r.content)[0].replace(' ', '')
             except:
-                netname=re.findall('<p>Name : (.*?)</p>',r.content)[0].replace(' ','')
-            rd.set(ip,netname)
-        except Exception,e:
+                netname = re.findall('<p>Name : (.*?)</p>',
+                                     r.content)[0].replace(' ', '')
+            rd.set(ip, netname)
+        except Exception, e:
             print e
-            netname='home'
+            netname = 'home'
     return netname
 
 
@@ -109,15 +114,15 @@ def before_request():
     except:
         ip = request.remote_addr
     print ip
-    netname=getipwhois(ip)
-
+    netname = getipwhois(ip)
 
 
 def log(string):
     global ip
     global ua
     global netname
-    logger.info('ip:{ip},netname:{netname},UA:{ua},action:{string}'.format(ip=ip,netname=netname,ua=ua,string=string))
+    logger.info('ip:{ip},netname:{netname},UA:{ua},action:{string}'.format(
+        ip=ip, netname=netname, ua=ua, string=string))
 
 
 @app.route('/')
@@ -129,12 +134,16 @@ def index():
 
 
 @app.route('/api', methods=['POST'])
+@ratelimit(limit=5, per=10)
 def api():
+    global ua
+    global ip
     url = request.form.get('url')
     hash_ = request.form.get('hash')
     captcha_code = request.form.get('captcha_code')
-    if ip in ['111.231.237.241','111.230.109.198','91.121.83.61'] or sum([i.lower() in netname.lower() for i in ban])>0:
-        retdata={}
+    if ip in ['111.231.237.241', '111.230.109.198', '91.121.83.61'] or sum([i.lower() in netname.lower() for i in ban]) > 0 or sum([i.lower() in ua.lower() for i in bad_ua]) > 0:
+        log('bad user')
+        retdata = {}
         retdata['status'] = 'fail'
         retdata['message'] = '机器人滚！如果不是机器人，请不要通过代理访问本站！'
         return jsonify(retdata)
@@ -144,7 +153,7 @@ def api():
         print 'session code is :', session.get('CAPTCHA')
         if captcha_code.upper() == session.get('CAPTCHA'):
             return jsonify({'captcha': 'pass'})
-    if hash_ != session.get('hash') or hash_ is None or request.headers['User-Agent'] is None or 'python' in request.headers['User-Agent'].lower():
+    if hash_ != session.get('hash') or hash_ is None:
         log('may be a crawler!!! url {}'.format(url))
         return jsonify({'captcha': 'ok'})
     else:
@@ -279,12 +288,13 @@ def api():
 def download():
     id = request.args.get('id')
     type = request.args.get('type')
-    log('download from {} {}'.format(id,type))
+    log('download from {} {}'.format(id, type))
     if type == 'video':
         isvideo = 1
     else:
         isvideo = 0
-    query_result = Context.query.filter_by(uid=id, isvideo=isvideo).order_by(Context.posttime.desc()).all()
+    query_result = Context.query.filter_by(
+        uid=id, isvideo=isvideo).order_by(Context.posttime.desc()).all()
     if len(query_result) <> 0:
         content = ''
         for line in query_result:
