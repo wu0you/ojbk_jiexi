@@ -23,7 +23,7 @@ class ID(db.Model):
 class Context(db.Model):
     __tablename__ = 'context_table'
     uid = db.Column(db.String(64), primary_key=True)
-    pid=db.Column(db.String(200),primary_key=True)
+    pid=db.Column(db.String(64),primary_key=True)
     urls = db.Column(db.String(200))
     isvideo = db.Column(db.Integer, default=0)  # 0=no,1=yes
     poster = db.Column(db.String(200))
