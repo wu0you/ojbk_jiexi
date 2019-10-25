@@ -12,11 +12,8 @@ class RandomChar(object):
         #val = random.randint(0x4E00, 0x9FBB)
         # 只使用英文字母
         val = random.randint(65, 90)
-<<<<<<< .merge_file_tJHIjl
-        return unichr(val)1555
-=======
+        return unichr(val)ceshi
         return unichr(val)14
->>>>>>> .merge_file_TXufYn
 
     @staticmethod
     def GB2312():
