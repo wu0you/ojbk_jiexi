@@ -12,7 +12,7 @@ class RandomChar(object):
         #val = random.randint(0x4E00, 0x9FBB)
         # 只使用英文字母
         val = random.randint(65, 90)
-        return unichr(val)1
+        return unichr(val)14
 
     @staticmethod
     def GB2312():
